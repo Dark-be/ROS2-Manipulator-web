@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Web-Controller</title>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Web-Controller</h1>
+    </header>
+    <main>
+        <div class="section-row">
+            <section class="sagittarius-section">
+                <h1>SAGITTARIUS</h1>
+                <div>target x: <span id="target_x"> </span></div>
+                <div>target y: <span id="target_y"> </span></div>
+                <div>target z: <span id="target_z"> </span></div>
+                <div>target roll: <span id="target_roll"> </span></div>
+                <input type="range" min="-90" max="90" value="0" class="slider" id="target_roll_slider">
+                <div>target pitch: <span id="target_pitch"> </span></div>
+                <input type="range" min="-90" max="90" value="0" class="slider" id="target_pitch_slider">
+                <div>target yaw: <span id="target_yaw"> </span></div>                                                                                                      
+                <div>target grip: <span id="target_grip"> </span></div>
+                <input type="range" min="0" max="100" value="0" class="slider" id="target_grip_slider">
+                <div>accuracy: <input type="text" id="accuracy" value="0.01"></div>
+                <div class="control-buttons">
+                    <button id="send">Send</button>
+                    <button id="reset">Reset</button>
+                    <button id="up" >Up</button>
+                    <button id="down">Down</button>
+                    <button id="left">Left</button>
+                    <button id="right">Right</button>
+                    <button id="forward">Forward</button>
+                    <button id="backward">Backward</button>
+                </div>
+            </section>
+            <section class="dog-section">
+                <h1>UNITREE GO</h1>
+                <div>
+                    <button id="send1">Send</button>
+                </div>
+            
+                <div>
+                    <button id="go_forward">Go Forward</button>
+                    <button id="go_backward">Go Backward</button>
+                    <button id="go_left">Go Left</button>
+                    <button id="go_right">Go Right</button>
+                </div>
+            </section>
+        </div>
+        <div class="section-row">
+            <section class="chat-section">
+                <h1>CHAT</h1>
+                <div class="chat-buttons">
+                    <button id="chat_bt">Chat</button>
+                    <button id="cls_bt">Clear</button>
+                    <button id="reco_bt">Reco</button>
+                </div>
+                <div id="chat_state"></div>
+                <div id="chat_text"></div>
+                <div id="command">Command:</div>
+            </section>
+            <section class="recognition-section">
+                <h1>RECOGNITION</h1>
+                <div>item list: <span id="item_list"> </span></div>
+                <div>
+                    <button id="reco">Recognize</button>
+                    <div>reco target: <input type="text" id="reco_target" value="bottle"></div>
+                    <div>reco state: <span id="reco_state"> Off </span></div>
+                    <button id="track">Track</button>
+                    <button id="search">Search</button>
+                </div>
+            </section>
+        <div>
+
+    </main>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="./js/axios.min.js"></script>
+    <script src="./js/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+
+    <script src="./js/main.js"></script>
+    <script src="./js/sagittarius.section.js"></script>
+    <script src="./js/chat.section.js"></script>
+    <script src="./js/recognition.section.js"></script>
+    <script src="./js/tools.js"></script>
+</body>
+</html>
