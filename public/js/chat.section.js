@@ -1,172 +1,187 @@
+var speech_key = '';
+var speech_region = '';
+var chat_key = '';
+var chat_url = '';
+const chat_url_end = ['.cn', '.com.cn', '.tech']
 async function getSpeechKey() {
+  if(!speech_key || !speech_region){
     const res = await axios.get('/api/get-speech-token');
-    const key = res.data.key;
-    const region = res.data.region;
-
-    return { key: key, region: region };
+    speech_key = res.data.key;
+    speech_region = res.data.region;
+    console.log('Got speech-token');
+  }
 }
 async function getChatKey() {
+  if(!chat_key || !chat_url){
     const res = await axios.get('/api/get-chat-token');
-    const chatKey = res.data.key;
-    return chatKey;
+    chat_key = res.data.key;
+    chat_url = res.data.url;
+    console.log('Got chat-token');
+  }
 }
-const chatButton = document.getElementById("chat_bt");
-const clsButton = document.getElementById("cls_bt");
-const recoButton = document.getElementById("reco_bt")
-const chatState = document.getElementById("chat_state")
-const chatText = document.getElementById("chat_text");
-chatState.innerText = 'Ready to chat.';
-const command = document.getElementById('command');
-var commands;
+var is_command = false;
+var is_vpn = false;
+var end_num = 1;
+const chat_message_text = document.getElementById('chat_message');
+const is_command_bt = document.getElementById('is_command');
+const is_vpn_bt = document.getElementById('is_vpn');
+const chat_send_bt = document.getElementById('chat_send');
+const chat_response_text = document.getElementById('chat_response');
+const stt_bt = document.getElementById('stt');
 
-chatButton.addEventListener('click', sttFromMic);
-clsButton.addEventListener('click', function(){
-    console.log('Output has been clear')
-    chatText.innerText = '';
-    command.innerText = 'Command:';
-    //textToSpeech("Output has been clear.");
-});
-recoButton.addEventListener('click', () => {
-    getRecognitction();
-    item_list_str = "";
-    for(const [key, value] of Object.entries(item_list)){
-        item_list_str += `${key}, `;
-    }
-    console.log(item_list_str)
+is_command_bt.addEventListener('click', () => {
+  if(is_command == false){
+    console.log('Command mode');
+    is_command = true;
+    is_command_bt.style.backgroundColor = "#80F080";
+  }
+  else{
+    console.log('Chat mode');
+    is_command = false;
+    is_command_bt.style.backgroundColor = "white";
+  }
 })
+is_vpn_bt.addEventListener('click', () => {
+  if(is_vpn == false){
+    is_vpn = true;
+    end_num = 0;
+    is_vpn_bt.style.backgroundColor = "#80F080";
+  }
+  else{
+    is_vpn = false;
+    end_num = 1;
+    is_vpn_bt.style.backgroundColor = "white";
+  }
+})
+chat_send_bt.addEventListener('click', async () => {
+  chat_response_text.innerText = 'Waiting for response...';
+  if(is_command){
+    var res = await sendCommandMessage(chat_message_text.value);
+    chat_response_text.innerText = res;
+    commandParser(res);
+  }
+  else{
+    var res = await sendChatMessage(chat_message_text.value);
+    chat_response_text.innerText = res;
+        
+  }
+})
+var speech_recognizing = false;
+stt_bt.addEventListener('click', async () => {
+  if(speech_recognizing){
+    return;
+  }
+  speech_recognizing = true;
+  stt_bt.style.backgroundColor = "#80F080";
+  await sttFromMic();
+  stt_bt.style.backgroundColor = "white";
+  speech_recognizing = false;
+})
+
 async function sttFromMic() {
-    const soeechKey = await getSpeechKey();
+  await getSpeechKey();
 
-    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(soeechKey.key, soeechKey.region);
-    speechConfig.speechRecognitionLanguage = 'zh-CN';
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speech_key, speech_region);
+  speechConfig.speechRecognitionLanguage = 'zh-CN';
 
-    const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
-    chatState.innerText = 'Speak to microphone...'
-    recognizer.recognizeOnceAsync(
-        function(result) {
-            if(result.text){
-                chatText.innerText += '\nRes: ' + result.text;
-                chatState.innerText = 'Ready to chat.';
-                commandParser(result.text)
-            }
-            else {
-                chatState.innerText = 'Please try again.';
-            }
-        },
-        function(err){
-            console.log(err);
-            chatState.innerText = 'Error: ' + err;
-        }
-    );
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+  const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+  chat_message_text.value = 'Speak to microphone...'
+  console.log('Speak to microphone...');
+  recognizer.recognizeOnceAsync(
+    function(result) {
+      if(result.text){
+        chat_message_text.value = result.text;
+      }
+      else {
+        chat_message_text.value = 'Please try again...';
+      }
+    },
+    function(err){
+      console.log(err);
+      chat_message_text.value = 'Error';
+    }
+  );
 }
 async function textToSpeech(str){
-    const soeechKey = await getSpeechKey();
+  const soeechKey = await getSpeechKey();
 
-    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(soeechKey.key, soeechKey.region);
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(soeechKey.key, soeechKey.region);
 
-    const player = new SpeechSDK.SpeakerAudioDestination();
-    const audioConfig = SpeechSDK.AudioConfig.fromSpeakerOutput(player);
-    speechConfig.SpeechSynthesisVoiceName = "en-US-AndrewNeural";
-    let synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+  const player = new SpeechSDK.SpeakerAudioDestination();
+  const audioConfig = SpeechSDK.AudioConfig.fromSpeakerOutput(player);
+  speechConfig.SpeechSynthesisVoiceName = "en-US-AndrewNeural";
+  let synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
 
-    synthesizer.speakTextAsync(str, 
-    function(result) {
-        synthesizer.close();
-        synthesizer = undefined;
-        console.log('Finished speaking')
-    },
-    function (err) {
-        synthesizer.close();
-        synthesizer = undefined;
-        console.log(err);
-    });
+  synthesizer.speakTextAsync(str, 
+  function(result) {
+    synthesizer.close();
+    synthesizer = undefined;
+    console.log('Finished speaking')
+  },
+  function (err) {
+    synthesizer.close();
+    synthesizer = undefined;
+    console.log(err);
+  });
 }
-async function chatWithGPT(str){
-    console.log('User Message:', str);
+async function sendChatMessage(str){
+  try {
+    await getChatKey();
     const postData = {
-        model: 'gpt-3.5-turbo',
-        messages: [{
-            role: 'user',
-            content: str
-        }],
-        temperature: 0.7,
+      model: 'gpt-3.5-turbo',
+      messages: [{
+          role: 'user',
+          content: str
+      }],
+      temperature: 0.7,
     };
-    const chatKey = await getChatKey();
-
-    await axios.post('https://api.chatanywhere.com.cn/v1/chat/completions', postData,
+    const response = await axios.post(chat_url + chat_url_end[end_num] + '/v1/chat/completions', postData,
     {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${chatKey}`,
-        },
-    }).then(response => {
-        result = response.data.choices[0].message.content
-        console.log('ChatMessage:', result);
-        // textToSpeech(result)
-        commands = result;
-    }).catch(error => {
-        console.error(error);
-    });
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${chat_key}`,
+      },
+    })
+    console.log('Response:', response.data.choices[0].message.content);
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    console.error(error);
+    return 'Error';
+  }
 }
-
-const actionQueue = [];
-const moveRegex = /move\{x:(-?\d+(\.\d+)?),y:(-?\d+(\.\d+)?),z:(-?\d+(\.\d+)?)\}/
-const gripRegex = /grip\{(\d+)\}/
-const trackRegex = /track/
+async function sendCommandMessage(str){
+  return await sendChatMessage(`现在你是一个智能机器人，你可以通过基本动作指令控制机械臂，也就是你的手，尽可能将我的自然语言指令变成基本动作指令序列。
+    你能够操作的指令包括updown leftright forward grip search。
+    比如updown 0.02表示向上移动2厘米，updown -0.02表示向下移动2厘米，leftright 2表示向左转2度，leftright -2表示向右转2度，
+    forward 0.02表示向前移动2厘米，forward -0.02表示向后移动2厘米。grip 50表示夹取力度为50，力度总共有100级。
+    search item表示搜索物品item，你应该将物品名字转为英文，比如我让你搜索瓶子，对应的指令应该是search bottle。
+    接下来我把语音识别得到的自然语言指令传给你，你需要解析这个指令，然后按顺序告诉我应该执行的动作。
+    比如updown 0.02,updown -0.02表示先向上移动2厘米再向下移动2厘米，不同指令之间用英文逗号隔开。
+    我的自然语言指令是：${str}，请解析并回答，不要有除指令以外的多余的输出。
+  `);
+}
 
 async function commandParser(str){
-    if(str){
-        console.log('Parsering command');
-        await chatWithGPT(`现在你是一个将自然语言解析为指令的模型,
-        例如,机械臂坐标是{x:0,y:0,z:0.2},单位为米，我的语音指令为"往上移动五厘米",
-        那么你应该给出move{x:0,y:0,z:0.25}, 
-        如果我还想要抓取,你可以继续在上一个指令后添加指令grip{100},100为完全握紧,0为完全松开,你也可以取中间的整数值来控制松紧,记住指令之间应该用空格隔开,
-        所有识别物品的物品列表是${item_list_str},我要求识别时,你应该回答track{}。或者我问你是否存在某件物品，你也应该回答。
-        现在请你忽略掉上面的语音消息,接下来才是真的解析指令，当前真实机械臂坐标是{x:${pose.x},y:${pose.y},z:${pose.z}},
-        我的语音指令为"${str}"，那么你应该回答什么？`);
-        console.log('Commands:', commands);
-        if(commands){
-            const commandList = commands.split(' ')
-            console.log(commandList);
-            for(const command of commandList) {
-                let match;
-                if(match = gripRegex.exec(command)){
-                    command.innerText += ('\n' + command);
-
-                    grip_range.value = match[1];
-                    console.log('Grip to:', match[1]);
-                    socket.emit('Grip', grip_range.value);
-                } else if(match = moveRegex.exec(command)){
-                    command.innerText += ('\n' + command);
-
-                    const x = parseFloat(match[1]);
-                    const y = parseFloat(match[3]);
-                    const z = parseFloat(match[5]);
-                    console.log("Move to X:", x, "Y:", y, "Z:", z);
-
-                    // lastPos.x = x * 400 + x_orig;
-                    // lastPos.y = y * 400 + y_orig;
-                    pose.x = x;
-                    pose.y = y;
-                    pose.z = z;
-                    z_range.value = z * 100;
-                    socket.emit('Pose',{
-                        x: pose.x,
-                        y: pose.y,
-                        z: pose.z,
-                        roll: pose.roll,
-                        pitch: pose.pitch,
-                        yaw: pose.yaw
-                    })
-                }
-                else if(match = trackRegex.exec(command)){
-                    trackSwitch.click();
-                    console.log('Track:', match[1]);
-                    
-                }
-                sleep(2000);
-            }
-        }
+  console.log('Parsering command...');
+  if(str){
+    var commandStr = str;
+    console.log('Commands:', str);
+    const commandList = commandStr.split(',')
+    for(const command of commandList) {
+      action = command.split(' ');
+      var i = 0;
+      if(action[0] == ''){
+        i += 1;
+      }
+      type = action[i];
+      value = action[i+1];
+      if(!isNaN(value)){
+          value = parseFloat(value);
+      }
+      var action = new Action(type, value);
+      console.log('AI Action:', action);
+      socket.emit('SagittariusAction', action);
     }
+  }
 }

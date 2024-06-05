@@ -5,6 +5,7 @@ const search_bt = document.getElementById('search');
 const item_list_element = document.getElementById('item_list');
 const reco_target_element = document.getElementById('reco_target');
 const reco_state_element = document.getElementById('reco_state');
+const search_range_element = document.getElementById('search_range');
 // off searching... not found
 
 item_list = {}
@@ -26,12 +27,14 @@ let searching = false;
 search_bt.addEventListener('click', () => {
     if(searching == false){
         searching = true;
-        socket.emit('Search', reco_target_element.value);
+        reco_state_element.innerText = 'Searching...';
+        var action = new Action('search', reco_target_element.value);
+        socket.emit('SagittariusAction', action);
         search_bt.style.backgroundColor = "#80F080";
     }
     else{
         searching = false;
-        socket.emit('Search', 'stop');
+        
         search_bt.style.backgroundColor = "white";
     }
 })
@@ -44,41 +47,7 @@ socket.on('GetRecognition', (data) => {
     console.log("Recognition updated");
 })
 
-socket.on('GetSearch', (data) => {
-    searching = false;
-    search_bt.style.backgroundColor = "white";
-    if(data){
-        reco_state_element.innerText = 'Found';
-    }
-    else{
-        reco_state_element.innerText = 'Not Found';
-    }
-    console.log("Search updated");
-})
-
 let tracking = false;
 track_bt.addEventListener('click', () => {
     socket.emit('Search', trackTarget);
 })
-
-function track(item){
-    //console.log(item_list);
-    if(item_list[item]){
-        console.log('Yes, I have found', item);
-        x = item_list[item][0][0];
-        y = item_list[item][0][1];
-        x -= 320;
-        y -= 240;
-        if(x > 50){
-            Turn(-x / 50 *5);
-        }
-        if(x < -50){
-            Turn(-x / 50*5);
-        }
-        console.log('Item at X:', x , 'Y:', y)
-    }
-    else{
-        //console.log('No, I have not found', item);
-        //textToSpeech(`No, I have not found ${item}`);
-    }
-}

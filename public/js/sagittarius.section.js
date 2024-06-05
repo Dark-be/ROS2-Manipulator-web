@@ -41,57 +41,40 @@ accuracy_element.addEventListener('input', function() {
         accuracy = 0;
         console.log('Invalid Accuracy');
     }
-    
-});
+})
 
-function TurnAngle(angle){
-    var tmp_distance = Math.sqrt(pose.x * pose.x + pose.y * pose.y);
-    var tmp_yaw = (pose.yaw + angle);
-    if(tmp_yaw < 0){
-        tmp_yaw += 360;
-    }
-    if(tmp_yaw > 360){
-        tmp_yaw -= 360;
-    }
-    console.log('Yaw:', tmp_yaw);
-    pose.x = tmp_distance * Math.cos(tmp_yaw / 180 * Math.PI);
-    pose.y = tmp_distance * Math.sin(tmp_yaw / 180 * Math.PI);
-    pose.yaw = CalYaw(pose.x, pose.y);
-}
-function Forward(distance){
-    pose.x += distance * Math.cos(pose.yaw / 180 * Math.PI);
-    pose.y -= distance * Math.sin(pose.yaw / 180 * Math.PI);
-}
-function CalYaw(x, y){
-    var tmp_yaw = Math.atan2(y, x) * 180 / Math.PI;
+target_grip_slider.addEventListener('change', function() {
+    actionNow = new Action('grip', parseInt(this.value));
+})
 
-    return tmp_yaw;
-}
 up_bt.addEventListener('click', () => {
-    pose.z += accuracy;
+    actionNow = new Action('updown', accuracy);
 })
 down_bt.addEventListener('click', () => {
-    pose.z -= accuracy;
+    actionNow = new Action('updown', -accuracy);
 })
 left_bt.addEventListener('click', () => {
-    TurnAngle(-500 * accuracy);
+    actionNow = new Action('leftright', accuracy * 500);
 })
 right_bt.addEventListener('click', () => {
-    TurnAngle(500 * accuracy);
+    actionNow = new Action('leftright', -accuracy * 500);
 })
 forward_bt.addEventListener('click', () => {
-    Forward(accuracy);
+    actionNow = new Action('forward', accuracy);
 })
 backward_bt.addEventListener('click', () => {
-    Forward(-accuracy);
+    actionNow = new Action('forward', -accuracy);
 })
 reset_bt.addEventListener('click', () => {
-    pose.x = 0.17;
-    pose.y = 0;
-    pose.z = 0.19;
-    pose.roll = 0;
-    pose.pitch = 0;
-    pose.yaw = 0;
+    var tmpPose = {
+        x: 0.17,
+        y: 0,
+        z: 0.19,
+        roll: 0,
+        pitch: 0,
+        yaw: 0
+    }
+    actionNow = new Action('move', tmpPose);
 })
 send_bt.addEventListener('click', () => {
     if(sendingGrip == false && sendingPose == false){

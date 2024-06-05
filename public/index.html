@@ -53,37 +53,40 @@
         <div class="section-row">
             <section class="chat-section">
                 <h1>CHAT</h1>
-                <div class="chat-buttons">
-                    <button id="chat_bt">Chat</button>
-                    <button id="cls_bt">Clear</button>
-                    <button id="reco_bt">Reco</button>
+                <div>
+                    <div>chat message: <input type="text" id="chat_message" placeholder="Input your request">
+                        <button id="is_command">command</button>
+                        <button id="is_vpn">vpn</button>
+                    </div>
+                    <button id="chat_send">Send</button>
+                    <button id="stt">From Mic</button>
+                    <div>response: <span id="chat_response"> </span></div>
                 </div>
-                <div id="chat_state"></div>
-                <div id="chat_text"></div>
-                <div id="command">Command:</div>
             </section>
             <section class="recognition-section">
                 <h1>RECOGNITION</h1>
-                <div>item list: <span id="item_list"> </span></div>
                 <div>
+                    <div>item list: <span id="item_list"> </span></div>
                     <button id="reco">Recognize</button>
                     <div>reco target: <input type="text" id="reco_target" value="bottle"></div>
                     <div>reco state: <span id="reco_state"> Off </span></div>
+                    <div>search range: <input type="text" id="search_range" value="3"></div>
                     <button id="track">Track</button>
                     <button id="search">Search</button>
                 </div>
             </section>
         <div>
-
+        
     </main>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script src="./js/axios.min.js"></script>
-    <script src="./js/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+    <script src="./js/tool/axios.min.js"></script>
+    <script src="./js/tool/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
+    <script src="./js/tool/action.js"></script>
 
     <script src="./js/main.js"></script>
     <script src="./js/sagittarius.section.js"></script>
     <script src="./js/chat.section.js"></script>
     <script src="./js/recognition.section.js"></script>
-    <script src="./js/tools.js"></script>
+    
 </body>
 </html>
