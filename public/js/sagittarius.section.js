@@ -47,17 +47,24 @@ target_grip_slider.addEventListener('change', function() {
     actionNow = new Action('grip', parseInt(this.value));
 })
 
+target_roll_slider.addEventListener('change', function() {
+    actionNow = new Action('rotate', { roll: parseInt(this.value), pitch: 0 });
+})
+target_pitch_slider.addEventListener('change', function() {
+    actionNow = new Action('rotate', { roll: 0, pitch: parseInt(this.value) });
+})
+
 up_bt.addEventListener('click', () => {
-    actionNow = new Action('updown', accuracy);
+    actionNow = new Action('translate', { x: 0, y: 0, z: accuracy });
 })
 down_bt.addEventListener('click', () => {
-    actionNow = new Action('updown', -accuracy);
+    actionNow = new Action('translate', { x: 0, y: 0, z: -accuracy });
 })
 left_bt.addEventListener('click', () => {
-    actionNow = new Action('leftright', accuracy * 500);
+    actionNow = new Action('turn', accuracy * 500);
 })
 right_bt.addEventListener('click', () => {
-    actionNow = new Action('leftright', -accuracy * 500);
+    actionNow = new Action('turn', -accuracy * 500);
 })
 forward_bt.addEventListener('click', () => {
     actionNow = new Action('forward', accuracy);

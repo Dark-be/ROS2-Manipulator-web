@@ -12,7 +12,7 @@
     </header>
     <main>
         <div class="section-row">
-            <section class="sagittarius-section">
+            <section class="section">
                 <h1>SAGITTARIUS</h1>
                 <div>target x: <span id="target_x"> </span></div>
                 <div>target y: <span id="target_y"> </span></div>
@@ -36,7 +36,7 @@
                     <button id="backward">Backward</button>
                 </div>
             </section>
-            <section class="dog-section">
+            <section class="section">
                 <h1>UNITREE GO</h1>
                 <div>
                     <button id="send1">Send</button>
@@ -51,7 +51,7 @@
             </section>
         </div>
         <div class="section-row">
-            <section class="chat-section">
+            <section class="section">
                 <h1>CHAT</h1>
                 <div>
                     <div>chat message: <input type="text" id="chat_message" placeholder="Input your request">
@@ -63,11 +63,18 @@
                     <div>response: <span id="chat_response"> </span></div>
                 </div>
             </section>
-            <section class="recognition-section">
+            <section class="section">
+                <h1>IMAGE</h1>
+                <img id="realsense" src="" alt="image">
+            </section>
+
+
+            <section class="section">
                 <h1>RECOGNITION</h1>
                 <div>
                     <div>item list: <span id="item_list"> </span></div>
                     <button id="reco">Recognize</button>
+                    <button id="raw">Raw</button>
                     <div>reco target: <input type="text" id="reco_target" value="bottle"></div>
                     <div>reco state: <span id="reco_state"> Off </span></div>
                     <div>search range: <input type="text" id="search_range" value="3"></div>
@@ -87,6 +94,6 @@
     <script src="./js/sagittarius.section.js"></script>
     <script src="./js/chat.section.js"></script>
     <script src="./js/recognition.section.js"></script>
-    
+    <script src="./js/image.section.js"></script>
 </body>
 </html>

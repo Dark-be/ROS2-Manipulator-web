@@ -146,9 +146,10 @@ class Sagittarius {
 
     console.log('Sagi: Action:', this.actionNow);
     var action = this.actionNow;
-    action.state = ActionStates.EXCUTING;
+    
     switch(action.type) {
       case ActionTypes.MOVE:
+        action.state = ActionStates.EXCUTING;
         this.MoveToPose(action.value);
         var interval = setInterval(() => {
           if(this.getTarget) {
@@ -158,8 +159,11 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.UPDOWN:
-        this.targetPose.z += action.value;
+      case ActionTypes.TRANSLATE:
+        action.state = ActionStates.EXCUTING;
+        this.targetPose.x += action.value.x;
+        this.targetPose.y += action.value.y;
+        this.targetPose.z += action.value.z;
         this.MoveToPose(this.targetPose);
         var interval = setInterval(() => {
           if(this.getTarget) {
@@ -169,7 +173,21 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.LEFTRIGHT:
+      case ActionTypes.ROTATE:
+        action.state = ActionStates.EXCUTING;
+        this.targetPose.roll = action.value.roll;
+        this.targetPose.pitch = action.value.pitch;
+        this.MoveToPose(this.targetPose);
+        var interval = setInterval(() => {
+          if(this.getTarget) {
+            action.state = ActionStates.COMPLETED;
+            clearInterval(interval);
+          }
+        }, 200)
+        break;
+
+      case ActionTypes.TURN:
+        action.state = ActionStates.EXCUTING;
         this.TurnToAngle(this.targetPose.yaw + action.value);
         var interval = setInterval(() => {
           if(this.getTarget) {
@@ -180,6 +198,7 @@ class Sagittarius {
         break;
 
       case ActionTypes.FORWARD:
+        action.state = ActionStates.EXCUTING;
         this.Forward(action.value);
         var interval = setInterval(() => {
           if(this.getTarget) {
@@ -190,6 +209,7 @@ class Sagittarius {
         break;
 
       case ActionTypes.GRIP:
+        action.state = ActionStates.EXCUTING;
         action.value = parseFloat(action.value);
         this.GripToValue(action.value);
         setTimeout(() => {
@@ -198,6 +218,7 @@ class Sagittarius {
         break;
 
       case ActionTypes.SEARCH:
+        action.state = ActionStates.EXCUTING;
         console.log('Sagi: Searching:', action.value);
         var itemName = action.value;
         this.itemList = [];
@@ -206,7 +227,6 @@ class Sagittarius {
         
         var interval = setInterval(() => {
           if(this.recognitionRecv) {
-            var flag = false;
             for(const [key, value] of Object.entries(this.itemList)) {
               if(key == itemName) {
                 console.log('Sagi: Find an item:', itemName);
@@ -214,7 +234,6 @@ class Sagittarius {
                   console.log('Sagi: Item too far');
                 }
                 else {
-                  flag = true;
                   this.GripObject(this.itemList[itemName]);
                 }
               }
@@ -242,8 +261,9 @@ class Sagittarius {
 }
 const ActionTypes = {
   MOVE: 'move',
-  UPDOWN: 'updown',
-  LEFTRIGHT: 'leftright',
+  TRANSLATE: 'translate',
+  ROTATE: 'rotate',
+  TURN: 'turn',
   FORWARD: 'forward',
   GRIP: 'grip',
   SEARCH: 'search',

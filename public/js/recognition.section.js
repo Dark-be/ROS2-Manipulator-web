@@ -1,4 +1,5 @@
 const reco_bt = document.getElementById('reco');
+const raw_bt = document.getElementById('raw');
 const track_bt = document.getElementById('track');
 const search_bt = document.getElementById('search');
 
@@ -10,19 +11,38 @@ const search_range_element = document.getElementById('search_range');
 
 item_list = {}
 let recognizing = false;
-let recognizing_recv = true;
+let rawGetting = false;
 reco_bt.addEventListener('click', () => {
     if(recognizing == false){
         recognizing = true;
         reco_bt.style.backgroundColor = "#80F080";
-        socket.emit('GetRecognition', true);
     }
     else{
         recognizing = false;
         reco_bt.style.backgroundColor = "white";
-        socket.emit('GetRecognition', false);
     }
 })
+raw_bt.addEventListener('click', () => {
+    if(rawGetting == false){
+        rawGetting = true;
+        raw_bt.style.backgroundColor = "#80F080";
+    }
+    else{
+        rawGetting = false;
+        raw_bt.style.backgroundColor = "white";
+    }
+})
+
+setInterval(() => {
+    if(recognizing){
+        socket.emit('GetRecognition');
+    }
+    else if(rawGetting){
+        socket.emit('GetImage');
+    }
+}, 400)
+
+
 let searching = false;
 search_bt.addEventListener('click', () => {
     if(searching == false){

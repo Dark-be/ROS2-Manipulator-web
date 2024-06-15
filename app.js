@@ -59,8 +59,16 @@ io.on('connection', (socket) => {
     sagittarius.GetRecognition(msg);
   })
 
-  socket.on('GetRecognition', (msg) => {
-    recognizing = msg;
+  socket.on('GetRecognition', () => {
+    io.emit('RequestRecognition');
+  })
+
+  socket.on('GetImage', () => {
+    io.emit('RequestImage');
+  })
+
+  socket.on('RecvImage', (msg) => {
+    io.emit('Image', msg);
   })
 })
 

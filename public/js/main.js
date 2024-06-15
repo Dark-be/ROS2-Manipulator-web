@@ -13,8 +13,6 @@ let sendingGrip = false;
 var actionNow = new Action('None', 0);
 
 setInterval(() => {
-  pose.roll = parseFloat(target_roll_slider.value);
-  pose.pitch = parseFloat(target_pitch_slider.value);
   grip = parseInt(target_grip_slider.value);
   if(sendingPose || sendingGrip){
     if(actionNow.type != 'None'){
@@ -23,5 +21,4 @@ setInterval(() => {
       actionNow = new Action('None', 0);
     }
   }
-  dataSync();
 }, 100);
