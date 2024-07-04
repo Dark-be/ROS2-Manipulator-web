@@ -5,7 +5,27 @@ class Action {
         this.state = state;
     }
 }
+const ActionStates = {
+    WAITING: 'waiting',
+    EXCUTING: 'excuting',
+    COMPLETED: 'completed',
+};
+const ActionTypes = {
+    UFORWARD: 'uforward',
+    UTURN: 'uturn',
+    USEARCH: 'usearch',
+    SMOVE: 'smove',
+    STRANSLATE: 'stranslate',
+    SROTATE: 'srotate',
+    STURN: 'sturn',
+    SFORWARD: 'sforward',
+    SGRIP: 'sgrip',
+    SSEARCH: 'ssearch',
+
+}
            
 module.exports = {
-    Action
+    Action,
+    ActionStates,
+    ActionTypes,
 }

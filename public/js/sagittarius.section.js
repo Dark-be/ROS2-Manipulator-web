@@ -23,6 +23,10 @@ const right_bt = document.getElementById('right');
 const forward_bt = document.getElementById('forward');
 const backward_bt = document.getElementById('backward');
 
+const pos1_bt = document.getElementById('pos1');
+const pos2_bt = document.getElementById('pos2');
+const pos3_bt = document.getElementById('pos3');
+
 const reset_bt = document.getElementById('reset');
 const send_bt = document.getElementById('send');
 
@@ -80,6 +84,39 @@ reset_bt.addEventListener('click', () => {
         roll: 0,
         pitch: 0,
         yaw: 0
+    }
+    actionNow = new Action('move', tmpPose);
+})
+pos1_bt.addEventListener('click', () => {
+    var tmpPose = {
+        x: 0.190526,
+        y: 0.11,
+        z: 0.19,
+        roll: 0,
+        pitch: 0,
+        yaw: 30
+    }
+    actionNow = new Action('move', tmpPose);
+})
+pos2_bt.addEventListener('click', () => {
+    var tmpPose = {
+        x: 0.22,
+        y: 0,
+        z: 0.19,
+        roll: 0,
+        pitch: 0,
+        yaw: 0
+    }
+    actionNow = new Action('move', tmpPose);
+})
+pos3_bt.addEventListener('click', () => {
+    var tmpPose = {
+        x: 0.190526,
+        y: -0.11,
+        z: 0.19,
+        roll: 0,
+        pitch: 0,
+        yaw: -30
     }
     actionNow = new Action('move', tmpPose);
 })

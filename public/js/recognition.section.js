@@ -40,7 +40,7 @@ setInterval(() => {
     else if(rawGetting){
         socket.emit('GetImage');
     }
-}, 400)
+}, 500)
 
 
 let searching = false;
@@ -69,5 +69,16 @@ socket.on('GetRecognition', (data) => {
 
 let tracking = false;
 track_bt.addEventListener('click', () => {
-    socket.emit('Search', trackTarget);
+    if(tracking == false){
+        tracking = true;
+        reco_state_element.innerText = 'Tracking...';
+        var action = new Action('search', reco_target_element.value);
+        socket.emit('UnitreeAction', action);
+        track_bt.style.backgroundColor = "#80F080";
+    }
+    else{
+        tracking = false;
+        
+        track_bt.style.backgroundColor = "white";
+    }
 })

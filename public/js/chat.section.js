@@ -17,6 +17,9 @@ async function getChatKey() {
     chat_key = res.data.key;
     chat_url = res.data.url;
     console.log('Got chat-token');
+    console.log('Chat URL:', chat_url);
+    console.log('Chat Key:', chat_key);
+
   }
 }
 var is_command = false;
@@ -58,12 +61,17 @@ chat_send_bt.addEventListener('click', async () => {
   if(is_command){
     var res = await sendCommandMessage(chat_message_text.value);
     chat_response_text.innerText = res;
+    // if(res!='Error'){
+    //   socket.emit('AIResponse', res);
+    // }
     commandParser(res);
   }
   else{
     var res = await sendChatMessage(chat_message_text.value);
     chat_response_text.innerText = res;
-        
+    if(res!='Error'){
+      socket.emit('AIResponse', res);
+    }
   }
 })
 var speech_recognizing = false;
@@ -136,7 +144,7 @@ async function sendChatMessage(str){
       }],
       temperature: 0.7,
     };
-    const response = await axios.post(chat_url + chat_url_end[end_num] + '/v1/chat/completions', postData,
+    const response = await axios.post(chat_url + chat_url_end[2] + '/v1/chat/completions', postData,
     {
       headers: {
           'Content-Type': 'application/json',

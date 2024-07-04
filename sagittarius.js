@@ -1,15 +1,16 @@
 
-const { Action } = require('./action.js');
+const { Action, ActionStates, ActionTypes } = require('./action.js');
 
 class Sagittarius {
-  constructor(node, io) {
+  constructor(node, io, actionQueue) {
     this.currentPose = { x: 0.17, y: 0, z: 0.19, roll: 0, pitch: 0, yaw: 0 }
     this.lastPose = { x: 0.17, y: 0, z: 0.19, roll: 0, pitch: 0, yaw: 0 }
+    
     this.targetPose = { x: 0.17, y: 0, z: 0.19, roll: 0, pitch: 0, yaw: 0 }
     this.originalPose = { x: 0.17, y: 0, z: 0.19, roll: 0, pitch: 0, yaw: 0 }
     this.searchPose = { x: 0.22, y: 0, z: 0.19, roll: 0, pitch: 0, yaw: 0 }
 
-    this.actionQueue = [];
+    this.actionQueue = actionQueue;
     this.actionNow = null;
 
     this.getTarget = false;
@@ -29,7 +30,7 @@ class Sagittarius {
       this.currentPose.roll = msg.data[3];
       this.currentPose.pitch = msg.data[4];
       this.currentPose.yaw = msg.data[5];
-      this.IsArmGetTarget(5);
+      this.IsArmGetTarget(3);
       this.lastPose.x = this.currentPose.x;
       this.lastPose.y = this.currentPose.y;
       this.lastPose.z = this.currentPose.z;
@@ -37,13 +38,8 @@ class Sagittarius {
       this.lastPose.pitch = this.currentPose.pitch;
       this.lastPose.yaw = this.currentPose.yaw;
     })
-    setInterval(() => {
-      this.ActionHandler();
-    }, 200)
-    setTimeout(() => {
-      this.MoveToPose(this.originalPose);
-      console.log('Sagi: Sagittarius created');
-    }, 500)
+    this.MoveToPose(this.originalPose);
+    console.log('Sagi: Sagittarius created');
     
   }
   IsArmGetTarget(times) {
@@ -105,6 +101,7 @@ class Sagittarius {
   }
 
   CameraToArm(camPose) {
+    camPose.x *= 0.8
     var yaw = this.currentPose.yaw / 180 * Math.PI;
     var x = this.currentPose.x + camPose.z * Math.cos(yaw) + camPose.x * Math.sin(yaw);
     var y = this.currentPose.y + camPose.z * Math.sin(yaw) - camPose.x * Math.cos(yaw);
@@ -121,34 +118,22 @@ class Sagittarius {
   }
 
   GripObject(position) {
-    var tmpPose = this.CameraToArm({x: position[0] - 0.02, y: position[1] + 0.05, z: position[2] - 0.11});//水平，垂直，前后
-    this.AddAction(new Action(ActionTypes.GRIP, 0));
-    this.AddAction(new Action(ActionTypes.MOVE, tmpPose));
-    this.AddAction(new Action(ActionTypes.FORWARD, 0.03));
-    this.AddAction(new Action(ActionTypes.FORWARD, 0.02));
-    this.AddAction(new Action(ActionTypes.GRIP, 50));
-    this.AddAction(new Action(ActionTypes.MOVE, this.originalPose));
-    this.AddAction(new Action(ActionTypes.GRIP, 0));
+    var tmpPose = this.CameraToArm({x: position[0] - 0.02, y: position[1] - 0.1, z: position[2] - 0.09});//水平，垂直，前后
+    // this.actionQueue.push(new Action(ActionTypes.SGRIP, 0, ActionStates.WAITING));
+    // this.actionQueue.push(new Action(ActionTypes.SMOVE, tmpPose, ActionStates.WAITING));
+    // this.actionQueue.push(new Action(ActionTypes.SGRIP, 95, ActionStates.WAITING));
+    // this.actionQueue.push(new Action(ActionTypes.SMOVE, this.originalPose, ActionStates.WAITING));
+    this.actionQueue.unshift(new Action(ActionTypes.SMOVE, this.originalPose, ActionStates.WAITING));
+    this.actionQueue.unshift(new Action(ActionTypes.SGRIP, 95, ActionStates.WAITING));
+    this.actionQueue.unshift(new Action(ActionTypes.SFORWARD, 0.04, ActionStates.WAITING));
+    this.actionQueue.unshift(new Action(ActionTypes.SMOVE, tmpPose, ActionStates.WAITING));
+    this.actionQueue.unshift(new Action(ActionTypes.SGRIP, 0, ActionStates.WAITING));
   }
-  AddAction(action) {
-    this.actionQueue.push(action);
-  }
-  //执行机构
-  ActionHandler() {
-    if(this.actionNow != null && this.actionNow.state == ActionStates.EXCUTING) {
-      console.log('Sagi: Sagittarius busy now in excuting action:', this.actionNow);
-      return
-    }
-    if(this.actionQueue.length > 0) {
-      this.actionNow = this.actionQueue.shift();
-    }
-    else { return }
 
-    console.log('Sagi: Action:', this.actionNow);
-    var action = this.actionNow;
-    
+  //执行机构
+  ActionHandler(action) {
     switch(action.type) {
-      case ActionTypes.MOVE:
+      case ActionTypes.SMOVE:
         action.state = ActionStates.EXCUTING;
         this.MoveToPose(action.value);
         var interval = setInterval(() => {
@@ -159,7 +144,7 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.TRANSLATE:
+      case ActionTypes.STRANSLATE:
         action.state = ActionStates.EXCUTING;
         this.targetPose.x += action.value.x;
         this.targetPose.y += action.value.y;
@@ -173,7 +158,7 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.ROTATE:
+      case ActionTypes.SROTATE:
         action.state = ActionStates.EXCUTING;
         this.targetPose.roll = action.value.roll;
         this.targetPose.pitch = action.value.pitch;
@@ -186,7 +171,7 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.TURN:
+      case ActionTypes.STURN:
         action.state = ActionStates.EXCUTING;
         this.TurnToAngle(this.targetPose.yaw + action.value);
         var interval = setInterval(() => {
@@ -197,7 +182,7 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.FORWARD:
+      case ActionTypes.SFORWARD:
         action.state = ActionStates.EXCUTING;
         this.Forward(action.value);
         var interval = setInterval(() => {
@@ -208,44 +193,59 @@ class Sagittarius {
         }, 200)
         break;
 
-      case ActionTypes.GRIP:
+      case ActionTypes.SGRIP:
         action.state = ActionStates.EXCUTING;
         action.value = parseFloat(action.value);
         this.GripToValue(action.value);
         setTimeout(() => {
           action.state = ActionStates.COMPLETED;
-        }, 1500)
+        }, 2000)
         break;
 
-      case ActionTypes.SEARCH:
+      case ActionTypes.SSEARCH:
         action.state = ActionStates.EXCUTING;
         console.log('Sagi: Searching:', action.value);
         var itemName = action.value;
         this.itemList = [];
         this.recognitionRecv = false;
         this.io.emit('RequestRecognition');
-        
+        //this.io.emit('Speech', '正在寻找' + itemName);
+        var flag=0;
         var interval = setInterval(() => {
           if(this.recognitionRecv) {
-            for(const [key, value] of Object.entries(this.itemList)) {
-              if(key == itemName) {
+            //console.log('Sagi: Search item:',this.itemList);
+            this.itemList.some(item => {
+              
+              if(item['name'] == itemName) {
+                flag=1;
+                //this.io.emit('Speech', `找到了`);
                 console.log('Sagi: Find an item:', itemName);
-                if(value[2] > 0.4) {
+                if(item['position'][2] > 0.5) {
+                  //this.io.emit('Speech', `物品离我太远了,我要走近点`);
                   console.log('Sagi: Item too far');
+                  return false;
                 }
                 else {
-                  this.GripObject(this.itemList[itemName]);
+                  //this.io.emit('Speech', '开始抓取');
+                  this.GripObject(item['position']);
+                  return true;
                 }
+                
               }
+            })
+            if(flag==0){
+              //this.io.emit('Speech', `没有找到`);
+              console.log('Sagi: Item not found');
             }
-            console.log('Sagi: Item not found');
             action.state = ActionStates.COMPLETED;
             clearInterval(interval);
           }
         }, 200)
         setTimeout(() => {
           if(this.recognitionRecv == false) {
+            //this.io.emit('Speech', '我的眼睛好像出了点问题');
             console.log('Sagi: Search timeout');
+            action.state = ActionStates.COMPLETED;
             clearInterval(interval);
           }
         }, 4000)
@@ -254,29 +254,13 @@ class Sagittarius {
     }
   }
   GetRecognition(recognition) {
-    console.log('Sagi: Recognition:', recognition);
+    //console.log('Sagi: Recognition:', recognition);
     this.recognitionRecv = true;
     this.itemList = recognition;
   }
 }
-const ActionTypes = {
-  MOVE: 'move',
-  TRANSLATE: 'translate',
-  ROTATE: 'rotate',
-  TURN: 'turn',
-  FORWARD: 'forward',
-  GRIP: 'grip',
-  SEARCH: 'search',
-};
 
-const ActionStates = {
-  WAITING: 'waiting',
-  EXCUTING: 'excuting',
-  COMPLETED: 'completed',
-};
 
 module.exports = {
-  Sagittarius,
-  ActionTypes,
-  ActionStates,
+  Sagittarius
 }

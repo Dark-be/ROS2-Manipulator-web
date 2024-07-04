@@ -28,25 +28,34 @@
                 <div class="control-buttons">
                     <button id="send">Send</button>
                     <button id="reset">Reset</button>
-                    <button id="up" >Up</button>
+                    <button id="up">Up</button>
                     <button id="down">Down</button>
                     <button id="left">Left</button>
                     <button id="right">Right</button>
                     <button id="forward">Forward</button>
                     <button id="backward">Backward</button>
                 </div>
+                <div>
+                    <button id="pos1">Pos1</button>
+                    <button id="pos2">Pos2</button>
+                    <button id="pos3">Pos3</button>
+                </div>
             </section>
             <section class="section">
                 <h1>UNITREE GO</h1>
+                
+                <div>accuracy: <input type="text" id="accuracy_unitree" value="0.3"></div>
                 <div>
                     <button id="send1">Send</button>
-                </div>
-            
-                <div>
-                    <button id="go_forward">Go Forward</button>
-                    <button id="go_backward">Go Backward</button>
-                    <button id="go_left">Go Left</button>
-                    <button id="go_right">Go Right</button>
+                    <button id="vx_down">Down</button>
+                    Vx
+                    <button id="vx_up">Up</button>
+                    <button id="vy_down">Down</button>
+                    Vy
+                    <button id="vy_up">Up</button>
+                    <button id="vz_up">Left</button>
+                    Vz
+                    <button id="vz_down">Right</button>
                 </div>
             </section>
         </div>
@@ -94,6 +103,7 @@
     <script src="./js/sagittarius.section.js"></script>
     <script src="./js/chat.section.js"></script>
     <script src="./js/recognition.section.js"></script>
+    <script src="./js/unitree.go.section.js"></script>
     <script src="./js/image.section.js"></script>
 </body>
 </html>
